@@ -7,14 +7,10 @@ from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured, ValidationError
 from django.db import DEFAULT_DB_ALIAS, connection, connections
 from django.utils.module_loading import import_string
-
-try:
-    from django.apps import apps
-    get_model = apps.get_model
-except ImportError:
-    from django.db.models.loading import get_model
-
+from django.apps import apps
 from django.core import mail
+
+get_model = apps.get_model
 
 
 def get_tenant_model():

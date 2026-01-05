@@ -1,28 +1,33 @@
-version: '3.7'
+version: "3.7"
 
 services:
   db:
-    image: postgres
+    image: postgres:16
     container_name: django_tenants_db
     volumes:
-      - ./postgres-data:/var/lib/postgresql/data:z
+      - postgres_data:/var/lib/postgresql/data
     environment:
       - POSTGRES_USER=django_tenants
       - POSTGRES_PASSWORD=django_tenants
       - POSTGRES_DB=django_tenants
-      - DATABASE_PORT=5433
     ports:
       - "5433:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U django_tenants"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
   web:
     build: .
     command: gunicorn dts_test_project.wsgi:application --bind 0.0.0.0:8088
     container_name: django_tenants_web
     volumes:
-      - .:/code:z
+      - .:/code
     ports:
       - "8088:8088"
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     environment:
       - DATABASE_USER=django_tenants
       - DATABASE_PASSWORD=django_tenants
@@ -30,12 +35,11 @@ services:
       - DATABASE_HOST=db
   django-tenants-test:
     build: .
-    links:
-      - db
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     volumes:
-      - .:/code:z
+      - .:/code
     command: ./run_tests_in_docker.sh
     environment:
       - POSTGRES_USER=django_tenants
@@ -44,11 +48,8 @@ services:
       - DATABASE_PASSWORD=django_tenants
       - DATABASE_DB=django_tenants
       - DATABASE_HOST=db
-    ports:
-      - "8080:8080"
     stdin_open: true
     tty: true
-    restart: "no"
   django-tenants-pgadmin:
     container_name: django_tenants_pgadmin_container
     image: dpage/pgadmin4
@@ -65,3 +66,6 @@ services:
     image: redis:6.0.10
     ports:
       - "6379:6379"
+
+volumes:
+  postgres_data:

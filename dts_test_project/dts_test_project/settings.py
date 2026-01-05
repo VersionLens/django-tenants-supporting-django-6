@@ -23,8 +23,6 @@ SECRET_KEY = 'cl1)b#c&xmm36z3e(quna-vb@ab#&gpjtdjtpyzh!qn%bc^xxn'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-TEMPLATE_DEBUG = True
-
 ALLOWED_HOSTS = []
 
 # Application definition
@@ -57,8 +55,14 @@ MULTITENANT_STATICFILES_DIRS = [
     os.path.join(TENANT_APPS_DIR, "tenants/%s/static")
 ]
 
-STATICFILES_STORAGE = "django_tenants.staticfiles.storage.TenantStaticFilesStorage"
-DEFAULT_FILE_STORAGE = "django_tenants.files.storage.TenantFileSystemStorage"
+STORAGES = {
+    "default": {
+        "BACKEND": "django_tenants.files.storage.TenantFileSystemStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "django_tenants.staticfiles.storage.TenantStaticFilesStorage",
+    },
+}
 
 MULTITENANT_TEMPLATE_DIRS = [
     os.path.join(TENANT_APPS_DIR, "tenants/%s/templates")
@@ -102,15 +106,6 @@ MIDDLEWARE = (
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-)
-
-TEMPLATE_CONTEXT_PROCESSORS = (
-    'django.core.context_processors.request',
-    'django.contrib.auth.context_processors.auth',
-    'django.core.context_processors.debug',
-    'django.core.context_processors.media',
-    'django.core.context_processors.static',
-    'django.contrib.messages.context_processors.messages',
 )
 
 # Internationalization
